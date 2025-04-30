@@ -6,7 +6,7 @@ const users = ["20.json","123.json", "3.json", "9.json", "14.json", "8.json", "1
 users.forEach(fetching);
 function fetching(val) {
     // gets the value, fetches from server, then some js crap to get the json data
-    fetch(val).then(response => response.json()).then(jsondata => {
+    fetch("users/" + val).then(response => response.json()).then(jsondata => {
     //make a <center>
     const centering = document.createElement("center");
     // make an <h1>
