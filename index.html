@@ -1,14 +1,25 @@
 <script>
+// ok this is really hard to understand
+// basically its a.... table... that stores all the json names
 const users = ["20.json","123.json", "3.json", "9.json", "14.json", "8.json", "114.json", "563.json", "26.json", "1.json", "359.json", "12.json", "48.json", "150.json"];
+// for each user it runs the function fetching
 users.forEach(fetching);
 function fetching(val) {
+    // gets the value, fetches from server, then some js crap to get the json data
     fetch(val).then(response => response.json()).then(jsondata => {
+    //make a <center>
     const centering = document.createElement("center");
+    // make an <h1>
     const title = document.createElement("h1");
+    // set the h1 text to their username
     title.innerHTML = jsondata.data[0].owner.username
+    // add the h1 text to their user
     centering.appendChild(title);
+    // actually adds center
     document.body.appendChild(centering);
+    // then for each sound, it will make an entry on the page
     jsondata.data.forEach(makeentry)
+    // after foreach is done, it will make a little line thing to sepreate other users.
     const seperater = document.createElement("hr");
     document.body.appendChild(seperater);
     })
@@ -16,20 +27,27 @@ function fetching(val) {
 function makeentry(v) {
         //console.log(v.assetId)
         //console.log(v.assetName)
+        // making it to so u can actually click it
         const mainlink = document.createElement("a")
-        mainlink.href = "https://www.subter.org/library/" + v.assetId.toString();
-        mainlink.target = "_blank"
-        mainlink.className = "item"
+        mainlink.href = "https://www.subter.org/library/" + v.assetId.toString(); // where the link actually goes
+        mainlink.target = "_blank" // opens in a new tab
+        mainlink.className = "item" // for css purposes
+        // making image with the size of 200px
         const image = document.createElement("img");
         image.src = "audio.png";
         image.height = 200;
+        // so the text is below image
         const breakele = document.createElement("br");
+        // make h3 with sound name
         const title = document.createElement("h3")
         title.innerHTML = v.assetName
+        // make another center that im pretty sure dosent work but im too lazy to remove
         const centering = document.createElement("center");
+        // create play button (yes its on purpose that it replaces the page with the audio)
         const play = document.createElement("a")
         play.innerHTML = "Play"
         play.href = "https://www.subter.org/asset?id=" + v.assetId.toString();
+        // actually add everything
         centering.appendChild(play);
         mainlink.appendChild(image);
         mainlink.appendChild(breakele);
