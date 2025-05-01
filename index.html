@@ -112,6 +112,7 @@ function makeentry(v) {
             favourite.innerHTML = "Unfavourite"
             favourite.onclick = function() {
                 document.getElementsByClassName(v.owner.username.toString())[0].appendChild(mainlink);
+                favourite.innerHTML = "Favourite"
                 removelocalstorage(v.assetId);
             };
         }
