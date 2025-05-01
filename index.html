@@ -94,8 +94,10 @@ function makeentry(v) {
         const favourite = document.createElement("a")
         favourite.innerHTML = "Favourite"
         favourite.className = "favourite"
+        favourite.href = "#";
         favourite.onclick = function() {
             document.getElementsByClassName("favouritesclass")[0].appendChild(mainlink);
+            favourite.innerHTML = "Unfavourite"
             setlocalstorage(v.assetId);
         };
         // actually add everything
