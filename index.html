@@ -95,6 +95,7 @@ function makeentry(v) {
         play.innerHTML = "Play"
         play.href = "https://www.subter.org/asset?id=" + v.assetId.toString();
         play.className = "play"
+        play.target = "_blank" // opens in a new tab
         const favourite = document.createElement("a")
         favourite.innerHTML = "Favourite"
         favourite.className = "favourite"
