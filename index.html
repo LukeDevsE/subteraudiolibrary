@@ -143,9 +143,11 @@ function makeentry(v) {
     h3 {
         color: white;
         font-family: sans-serif;
-        word-wrap: break-word;
         width: 200px;
-        display:flex;
+        display:inline-block;
+        text-overflow: ellipsis;
+        white-space:nowrap;
+        overflow:hidden;
     }
     .play {
         color: white;
