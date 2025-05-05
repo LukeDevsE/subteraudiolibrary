@@ -1,176 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <link rel="icon" type="image/x-icon" href="syntax.ico">
-    <title>Subter Audio Library</title>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Subter Audio Library</title>
+  <link href="syntax.ico" rel="icon" type="image/x-icon" />
+  <style>
+    body {
+      margin: 0;
+      background-color: #121212;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #f0f0f0;
+      overflow-x: hidden;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 3rem auto;
+      padding: 1rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .user-dropdown {
+      margin-bottom: 2rem;
+      width: 100%;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 8px;
+      overflow: hidden;
+      background-color: #1e1e1e;
+      border: 1px solid #2d2d2d;
+      transition: all 0.3s ease;
+    }
+
+    .user-dropdown summary {
+      padding: 1rem 1.2rem;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: bold;
+      background-color: #272727;
+      user-select: none;
+      list-style: none;
+      outline: none;
+    }
+
+    .user-dropdown[open] summary {
+      background-color: #333;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .user-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding: 1rem;
+      justify-content: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .item {
+      background-color: #222;
+      border-radius: 10px;
+      padding: 1rem;
+      width: 200px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      transition: transform 0.2s, background-color 0.2s;
+    }
+
+    .item:hover {
+      transform: scale(1.03);
+      background-color: #2a2a2a;
+    }
+
+    .item img {
+      width: 100%;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+    }
+
+    h3 {
+      margin: 0.5rem 0;
+      font-size: 1rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+      margin-top: 0.5rem;
+    }
+
+    .actions a {
+      color: #90cdf4;
+      text-decoration: none;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+
+    .audio-player.hidden {
+      display: none;
+    }
+
+    .audio-player {
+      margin-top: 0.5rem;
+    }
+
+    .favouritesclass {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .dot {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.6;
+      animation: fall linear infinite;
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(-10px); }
+      100% { transform: translateY(100vh); }
+    }
+  </style>
 </head>
 <body>
-    <center><h1>Favourites</h1></center>
-    <div class="favouritesclass"></div>
-    <hr>
-</body>
-<script>
-// ok this is really hard to understand
-// basically its a.... table... that stores all the json names
-const users = ["20.json","123.json", "3.json", "9.json", "14.json", "8.json", "114.json", "563.json", "26.json", "1.json", "359.json", "12.json", "48.json", "150.json", "365.json", "119.json"];
-// for each user it runs the function fetching
-users.forEach(fetching);
-const getlocalstorage = JSON.parse(localStorage.getItem("favourite"));
-console.log(getlocalstorage)
-function fetching(val) {
-    // gets the value, fetches from server, then some js crap to get the json data
-    fetch("users/" + val).then(response => response.json()).then(jsondata => {
-    //make a <center>
-    const centering = document.createElement("center");
-    // make an <h1>
-    const title = document.createElement("h1");
-    // adding div so unfavouring puts it back in place
-    const userdiv = document.createElement("div")
-    userdiv.className = jsondata.data[0].owner.username;
-    // set the h1 text to their username
-    title.innerHTML = jsondata.data[0].owner.username
-    // add the h1 text to their user
-    centering.appendChild(title);
-    // actually adds center
-    document.body.appendChild(centering);
-    document.body.appendChild(userdiv);
-    // then for each sound, it will make an entry on the page
-    jsondata.data.forEach(makeentry)
-    // after foreach is done, it will make a little line thing to sepreate other users.
-    const seperater = document.createElement("hr");
-    document.body.appendChild(seperater);
-    })
-}
-function inlocalstorage(id) {
-    if (getlocalstorage == null) {
-        return false;
+  <div class="background" id="background"></div>
+  <main>
+    <header>Favourites</header>
+    <section class="favouritesclass"></section>
+    <hr style="border: none; border-top: 1px solid #444; margin: 2rem 0;">
+    <div id="user-sections"></div>
+  </main>
+  <script>
+    const users = [
+      "20.json","123.json","3.json","9.json","14.json","8.json","114.json",
+      "563.json","26.json","1.json","359.json","12.json","48.json","150.json","365.json"
+    ];
+    const getlocalstorage = JSON.parse(localStorage.getItem("favourite")) || [];
+    let currentAudio = null;
+    const userSections = document.getElementById("user-sections");
+
+    function inlocalstorage(id) {
+      return getlocalstorage.includes(id);
     }
-    if (getlocalstorage.includes(id)) {
-        return true;
+
+    function setlocalstorage(val) {
+      const updated = [...getlocalstorage, val];
+      localStorage.setItem("favourite", JSON.stringify(updated));
     }
-    else {
-        return false;
+
+    function removelocalstorage(val) {
+      const updated = getlocalstorage.filter(i => i !== val);
+      localStorage.setItem("favourite", JSON.stringify(updated));
     }
-}
-function setlocalstorage(val) {
-    var olditem = localStorage.getItem("favourite");
-    var parsedstuff = JSON.parse(olditem);
-    if (parsedstuff == null) {
-        localStorage.setItem("favourite",JSON.stringify([val]))
-    }
-    else {
-        parsedstuff.push(val)
-        localStorage.setItem("favourite",JSON.stringify(parsedstuff))
-    }
-}
-function removelocalstorage(val) {
-    var olditem = localStorage.getItem("favourite");
-    var parsedstuff = JSON.parse(olditem);
-    if (parsedstuff != null) {
-        parsedstuff.splice(parsedstuff.indexOf(val),1)
-        localStorage.setItem("favourite",JSON.stringify(parsedstuff))
-    }
-}
-function makeentry(v) {
-        //console.log(v.assetId)
-        //console.log(v.assetName)
-        // making it to so u can actually click it
-        const mainlink = document.createElement("a")
-        mainlink.href = "https://www.subter.org/library/" + v.assetId.toString(); // where the link actually goes
-        mainlink.target = "_blank" // opens in a new tab
-        mainlink.className = "item" // for css purposes
-        mainlink.id = v.owner.username.toString();
-        // making image with the size of 200px
-        const image = document.createElement("img");
-        image.src = "audio.png";
-        image.height = 200;
-        // so the text is below image
-        const breakele = document.createElement("br");
-        // make h3 with sound name
-        const title = document.createElement("h3")
-        title.innerHTML = v.assetName
-        // make another center that im pretty sure dosent work but im too lazy to remove
-        const centering = document.createElement("center");
-        centering.className = "center";
-        // create play button (yes its on purpose that it replaces the page with the audio)
-        const play = document.createElement("a")
-        play.innerHTML = "Play"
-        play.href = "https://www.subter.org/asset?id=" + v.assetId.toString();
-        play.className = "play"
-        play.target = "_blank" // opens in a new tab
-        const favourite = document.createElement("a")
-        favourite.innerHTML = "Favourite"
-        favourite.className = "favourite"
-        favourite.href = "#";
-        favourite.onclick = function() {
-            document.getElementsByClassName("favouritesclass")[0].appendChild(mainlink);
-            favourite.innerHTML = "Unfavourite"
-            setlocalstorage(v.assetId);
-        };
-        // actually add everything
-        centering.appendChild(play);
-        centering.appendChild(favourite);
-        mainlink.appendChild(image);
-        mainlink.appendChild(breakele);
-        mainlink.appendChild(title)
-        mainlink.appendChild(centering);
-        if (inlocalstorage(Number(v.assetId)) == true) {
-            document.getElementsByClassName("favouritesclass")[0].appendChild(mainlink);
-            favourite.innerHTML = "Unfavourite"
-            favourite.onclick = function() {
-                document.getElementsByClassName(v.owner.username.toString())[0].appendChild(mainlink);
-                favourite.innerHTML = "Favourite"
-                removelocalstorage(v.assetId);
+
+    function fetchUserData(filename, container) {
+      fetch("users/" + filename)
+        .then(res => res.json())
+        .then(json => {
+          const userGrid = document.createElement("div");
+          userGrid.className = "user-grid";
+
+          json.data.forEach(v => {
+            const item = document.createElement("div");
+            item.className = "item";
+
+            const img = document.createElement("img");
+            img.src = "audio.png";
+
+            const title = document.createElement("h3");
+            title.textContent = v.assetName;
+
+            const actions = document.createElement("div");
+            actions.className = "actions";
+
+            const play = document.createElement("a");
+            play.textContent = "Play";
+
+            const open = document.createElement("a");
+            open.textContent = "Open";
+            open.href = `https://www.subter.org/library/${v.assetId}`;
+            open.target = "_blank";
+
+            const fav = document.createElement("a");
+            fav.textContent = inlocalstorage(v.assetId) ? "Unfavourite" : "Favourite";
+
+            const audioContainer = document.createElement("div");
+            audioContainer.className = "audio-player hidden";
+
+            const audio = document.createElement("audio");
+            audio.controls = true;
+            audio.src = `https://www.subter.org/asset?id=${v.assetId}`;
+            audio.style.width = "100%";
+
+            audio.onplay = () => {
+              if (currentAudio && currentAudio !== audio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                currentAudio.parentElement.classList.add("hidden");
+              }
+              currentAudio = audio;
             };
-        }
-        else {
-            document.getElementsByClassName(v.owner.username.toString())[0].appendChild(mainlink);
-        }
+
+            play.onclick = (e) => {
+              e.preventDefault();
+              const isHidden = audioContainer.classList.contains("hidden");
+              if (currentAudio && currentAudio !== audio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                currentAudio.parentElement.classList.add("hidden");
+              }
+              if (isHidden) {
+                audioContainer.classList.remove("hidden");
+                audio.play();
+              } else {
+                audio.pause();
+                audioContainer.classList.add("hidden");
+              }
+              currentAudio = audio;
+            };
+
+            fav.onclick = (e) => {
+              e.preventDefault();
+              if (inlocalstorage(v.assetId)) {
+                removelocalstorage(v.assetId);
+                fav.textContent = "Favourite";
+                document.querySelector(".favouritesclass").removeChild(item);
+                userGrid.appendChild(item);
+              } else {
+                setlocalstorage(v.assetId);
+                fav.textContent = "Unfavourite";
+                userGrid.removeChild(item);
+                document.querySelector(".favouritesclass").appendChild(item);
+              }
+            };
+
+            actions.appendChild(play);
+            actions.appendChild(open);
+            actions.appendChild(fav);
+            audioContainer.appendChild(audio);
+
+            item.appendChild(img);
+            item.appendChild(title);
+            item.appendChild(actions);
+            item.appendChild(audioContainer);
+
+            if (inlocalstorage(v.assetId)) {
+              document.querySelector(".favouritesclass").appendChild(item);
+            } else {
+              userGrid.appendChild(item);
+            }
+          });
+
+          container.appendChild(userGrid);
+        });
     }
-</script>
-<style>
-    body {
-        background-color: #2f2f2f;
+
+    users.forEach(userFile => {
+      fetch("users/" + userFile)
+        .then(res => res.json())
+        .then(json => {
+          const username = json.data[0].owner.username;
+
+          const dropdown = document.createElement("details");
+          dropdown.className = "user-dropdown";
+          const summary = document.createElement("summary");
+          summary.textContent = username;
+          dropdown.appendChild(summary);
+          userSections.appendChild(dropdown);
+
+          summary.addEventListener("click", () => {
+            if (dropdown.children.length === 1) {
+              fetchUserData(userFile, dropdown);
+            }
+          });
+
+          dropdown.addEventListener("toggle", () => {
+            if (!dropdown.open && currentAudio) {
+              currentAudio.pause();
+              currentAudio.currentTime = 0;
+              currentAudio.parentElement.classList.add("hidden");
+              currentAudio = null;
+            }
+          });
+        });
+    });
+
+    const bg = document.getElementById("background");
+    const numDots = 60;
+    for (let i = 0; i < numDots; i++) {
+      const dot = document.createElement("div");
+      dot.className = "dot";
+      dot.style.left = Math.random() * 100 + "vw";
+      dot.style.animationDuration = 5 + Math.random() * 10 + "s";
+      dot.style.opacity = Math.random();
+      dot.style.width = dot.style.height = Math.random() * 3 + 2 + "px";
+      bg.appendChild(dot);
     }
-    .item {
-        background-color: #444444;
-        display:    inline-block;
-        border-radius: 5px;
-        text-decoration: none;
-        margin: 5px;
-    }
-    h1 {
-        color: white;
-        font-family: sans-serif;
-    }
-    h3 {
-        color: white;
-        font-family: sans-serif;
-        width: 200px;
-        display:inline-block;
-        text-overflow: ellipsis;
-        white-space:nowrap;
-        overflow:hidden;
-    }
-    .play {
-        color: white;
-        font-family: sans-serif;
-        word-wrap: break-word;
-        text-decoration: none;
-    }
-    .favourite {
-        color: white;
-        font-family: sans-serif;
-        word-wrap: break-word;
-        text-decoration: none;
-    }
-    .center {
-        column-gap: 20px;
-        display: flex;
-        justify-content: center;
-    }
-    a:hover {
-        color: rgb(27, 118, 229);
-    }
-    .item:hover {
-        background-color: #5f5f5f;
-    }
-</style>
+  </script>
+</body>
+</html>
